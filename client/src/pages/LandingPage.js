@@ -15,7 +15,7 @@ const LandingPage = (props) => {
       localStorage.setItem('juiceAI_user', JSON.stringify({ email }));
     }
     props.setIsAuthenticated(true);
-    window.location.href = './dashboard';
+    props.setShowDashboard(true);
   };
   
   return (

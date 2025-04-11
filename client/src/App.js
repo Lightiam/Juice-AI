@@ -11,6 +11,7 @@ import LandingPage from './pages/LandingPage';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false);
   
   useEffect(() => {
     const user = localStorage.getItem('juiceAI_user');
@@ -19,35 +20,32 @@ function App() {
     }
   }, []);
   
-  const ProtectedRoute = ({ children }) => {
-    if (!isAuthenticated) {
-      return <Navigate to="/" replace />;
-    }
-    return children;
-  };
-
+  
   return (
     <ContactProvider>
       <CampaignProvider>
         <Router>
-          <Routes>
-            {/* Public landing page route */}
-            <Route path="/" element={<LandingPage setIsAuthenticated={setIsAuthenticated} />} />
-            
-            {/* Protected app routes */}
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <Layout />
-              </ProtectedRoute>
-            }>
-              <Route index element={<Dashboard />} />
-              <Route path="contact-lists" element={<ContactLists />} />
-              <Route path="campaigns" element={<Campaigns />} />
-              <Route path="analytics" element={<Analytics />} />
-              <Route path="settings" element={<div className="p-4">Settings Page</div>} />
-              <Route path="help" element={<div className="p-4">Help Page</div>} />
-            </Route>
-          </Routes>
+          {isAuthenticated && showDashboard ? (
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/contact-lists" element={<ContactLists />} />
+                <Route path="/campaigns" element={<Campaigns />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/settings" element={<div className="p-4">Settings Page</div>} />
+                <Route path="/help" element={<div className="p-4">Help Page</div>} />
+              </Routes>
+            </Layout>
+          ) : (
+            <Routes>
+              <Route path="*" element={
+                <LandingPage 
+                  setIsAuthenticated={setIsAuthenticated} 
+                  setShowDashboard={setShowDashboard}
+                />
+              } />
+            </Routes>
+          )}
         </Router>
       </CampaignProvider>
     </ContactProvider>
