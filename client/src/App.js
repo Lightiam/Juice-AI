@@ -28,12 +28,13 @@ function App() {
           {isAuthenticated && showDashboard ? (
             <Layout>
               <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/contact-lists" element={<ContactLists />} />
-                <Route path="/campaigns" element={<Campaigns />} />
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/settings" element={<div className="p-4">Settings Page</div>} />
-                <Route path="/help" element={<div className="p-4">Help Page</div>} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/dashboard/contact-lists" element={<ContactLists />} />
+                <Route path="/dashboard/campaigns" element={<Campaigns />} />
+                <Route path="/dashboard/analytics" element={<Analytics />} />
+                <Route path="/dashboard/settings" element={<div className="p-4">Settings Page</div>} />
+                <Route path="/dashboard/help" element={<div className="p-4">Help Page</div>} />
+                <Route path="/" element={<Navigate to="/dashboard" />} />
               </Routes>
             </Layout>
           ) : (
