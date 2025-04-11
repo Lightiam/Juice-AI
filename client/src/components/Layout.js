@@ -13,7 +13,7 @@ const Layout = () => {
         </div>
         <nav className="mt-4">
           <NavLink 
-            to="#/dashboard" 
+            to="/dashboard" 
             className={({ isActive }) => 
               `flex items-center px-4 py-3 text-gray-700 ${isActive ? 'bg-indigo-50 text-indigo-600 border-r-4 border-indigo-600' : 'hover:bg-gray-50'}`
             }
@@ -23,7 +23,7 @@ const Layout = () => {
             <span>Dashboard</span>
           </NavLink>
           <NavLink 
-            to="#/dashboard/contact-lists" 
+            to="/dashboard/contact-lists" 
             className={({ isActive }) => 
               `flex items-center px-4 py-3 text-gray-700 ${isActive ? 'bg-indigo-50 text-indigo-600 border-r-4 border-indigo-600' : 'hover:bg-gray-50'}`
             }
@@ -32,7 +32,7 @@ const Layout = () => {
             <span>Contact Lists</span>
           </NavLink>
           <NavLink 
-            to="#/dashboard/campaigns" 
+            to="/dashboard/campaigns" 
             className={({ isActive }) => 
               `flex items-center px-4 py-3 text-gray-700 ${isActive ? 'bg-indigo-50 text-indigo-600 border-r-4 border-indigo-600' : 'hover:bg-gray-50'}`
             }
@@ -41,7 +41,7 @@ const Layout = () => {
             <span>Campaigns</span>
           </NavLink>
           <NavLink 
-            to="#/dashboard/analytics" 
+            to="/dashboard/analytics" 
             className={({ isActive }) => 
               `flex items-center px-4 py-3 text-gray-700 ${isActive ? 'bg-indigo-50 text-indigo-600 border-r-4 border-indigo-600' : 'hover:bg-gray-50'}`
             }
@@ -51,7 +51,7 @@ const Layout = () => {
           </NavLink>
           <div className="border-t border-gray-200 mt-4 pt-4">
             <NavLink 
-              to="#/dashboard/settings" 
+              to="/dashboard/settings" 
               className={({ isActive }) => 
                 `flex items-center px-4 py-3 text-gray-700 ${isActive ? 'bg-indigo-50 text-indigo-600 border-r-4 border-indigo-600' : 'hover:bg-gray-50'}`
               }
@@ -60,7 +60,7 @@ const Layout = () => {
               <span>Settings</span>
             </NavLink>
             <NavLink 
-              to="#/dashboard/help" 
+              to="/dashboard/help" 
               className={({ isActive }) => 
                 `flex items-center px-4 py-3 text-gray-700 ${isActive ? 'bg-indigo-50 text-indigo-600 border-r-4 border-indigo-600' : 'hover:bg-gray-50'}`
               }
