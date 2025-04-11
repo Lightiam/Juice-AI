@@ -1,6 +1,7 @@
 fastapi==0.95.1
 uvicorn==0.22.0
-spacy==3.5.3
+numpy==1.23.5
+spacy==3.4.4
 requests==2.29.0
 beautifulsoup4==4.12.2
 python-dotenv==1.0.0
