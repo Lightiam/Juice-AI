@@ -4,8 +4,11 @@ WORKDIR /app
 
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt && \
-    python -m spacy download en_core_web_lg
+# Install dependencies without spaCy model
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Download a smaller spaCy model to avoid compatibility issues
+RUN python -m spacy download en_core_web_sm
 
 COPY . .
 
