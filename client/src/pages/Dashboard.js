@@ -25,25 +25,111 @@ const Dashboard = () => {
     try {
       setIsProcessing(true);
       
-      const response = await axios.post('/api/extract', { source, type });
-      const extractedContacts = response.data;
-      
-      const savedContacts = await addContacts(extractedContacts);
-      
-      setMessages(prevMessages => {
-        const filteredMessages = prevMessages.filter(msg => !msg.processing);
+      if (type === 'url' && source.includes('linkedin.com')) {
+        const linkedinContact = {
+          type: "social",
+          value: source,
+          source: source,
+          metadata: {
+            platform: "linkedin"
+          },
+          tags: ["auto-extracted", "linkedin"]
+        };
         
-        return [
-          ...filteredMessages,
-          { 
-            type: 'assistant', 
-            content: `I found ${savedContacts.length} contact(s) in your input.`,
-            contacts: savedContacts
+        const urlParts = source.split('/');
+        if (urlParts.length > 4) {
+          if (urlParts[3] === 'in') {
+            linkedinContact.metadata.profile_id = urlParts[4].split('?')[0];
+            linkedinContact.metadata.profile_type = "personal";
+          } else if (urlParts[3] === 'company') {
+            linkedinContact.metadata.company_id = urlParts[4].split('?')[0];
+            linkedinContact.metadata.profile_type = "company";
           }
-        ];
-      });
+        }
+        
+        const savedContacts = await addContacts([linkedinContact]);
+        
+        setMessages(prevMessages => {
+          const filteredMessages = prevMessages.filter(msg => !msg.processing);
+          
+          return [
+            ...filteredMessages,
+            { 
+              type: 'assistant', 
+              content: `I found a LinkedIn profile in your input. LinkedIn restricts automated scraping, but I've extracted the profile URL.`,
+              contacts: savedContacts
+            }
+          ];
+        });
+        
+        return savedContacts;
+      }
       
-      return savedContacts;
+      try {
+        const response = await axios.post('/api/extract', { source, type });
+        const extractedContacts = response.data;
+        
+        const savedContacts = await addContacts(extractedContacts);
+        
+        setMessages(prevMessages => {
+          const filteredMessages = prevMessages.filter(msg => !msg.processing);
+          
+          return [
+            ...filteredMessages,
+            { 
+              type: 'assistant', 
+              content: `I found ${savedContacts.length} contact(s) in your input.`,
+              contacts: savedContacts
+            }
+          ];
+        });
+        
+        return savedContacts;
+      } catch (apiError) {
+        console.error('API extraction error:', apiError);
+        
+        if (type === 'url' && source.includes('linkedin.com')) {
+          const linkedinContact = {
+            type: "social",
+            value: source,
+            source: source,
+            metadata: {
+              platform: "linkedin"
+            },
+            tags: ["auto-extracted", "linkedin"]
+          };
+          
+          const urlParts = source.split('/');
+          if (urlParts.length > 4) {
+            if (urlParts[3] === 'in') {
+              linkedinContact.metadata.profile_id = urlParts[4].split('?')[0];
+              linkedinContact.metadata.profile_type = "personal";
+            } else if (urlParts[3] === 'company') {
+              linkedinContact.metadata.company_id = urlParts[4].split('?')[0];
+              linkedinContact.metadata.profile_type = "company";
+            }
+          }
+          
+          const savedContacts = await addContacts([linkedinContact]);
+          
+          setMessages(prevMessages => {
+            const filteredMessages = prevMessages.filter(msg => !msg.processing);
+            
+            return [
+              ...filteredMessages,
+              { 
+                type: 'assistant', 
+                content: `I found a LinkedIn profile in your input. LinkedIn restricts automated scraping, but I've extracted the profile URL.`,
+                contacts: savedContacts
+              }
+            ];
+          });
+          
+          return savedContacts;
+        }
+        
+        throw apiError;
+      }
     } catch (error) {
       console.error('Extraction error:', error);
       
