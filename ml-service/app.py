@@ -19,12 +19,12 @@ logger = logging.getLogger(__name__)
 app = FastAPI(title="Juice AI ML Service")
 
 try:
-    nlp = spacy.load("en_core_web_lg")
+    nlp = spacy.load("en_core_web_sm")
     logger.info("Loaded spaCy model successfully")
 except OSError:
     logger.warning("Downloading spaCy model...")
-    os.system("python -m spacy download en_core_web_lg")
-    nlp = spacy.load("en_core_web_lg")
+    os.system("python -m spacy download en_core_web_sm")
+    nlp = spacy.load("en_core_web_sm")
     logger.info("Downloaded and loaded spaCy model successfully")
 
 class ExtractionRequest(BaseModel):
@@ -125,10 +125,42 @@ def extract_metadata_with_nlp(text, contacts):
 def fetch_url_content(url):
     """Fetch and parse content from a URL."""
     try:
+        if 'linkedin.com' in url:
+            parsed_url = urlparse(url)
+            path_parts = parsed_url.path.strip('/').split('/')
+            
+            if len(path_parts) >= 2:
+                if path_parts[0] == 'in':
+                    profile_id = path_parts[1]
+                    return {
+                        'text': f"LinkedIn Profile: {profile_id}. LinkedIn restricts automated scraping, but we've extracted the profile ID.",
+                        'html': f"<html><body>LinkedIn Profile: {profile_id}</body></html>",
+                        'url': url,
+                        'synthetic': True
+                    }
+                elif path_parts[0] == 'company':
+                    company_id = path_parts[1]
+                    return {
+                        'text': f"LinkedIn Company: {company_id}. LinkedIn restricts automated scraping, but we've extracted the company ID.",
+                        'html': f"<html><body>LinkedIn Company: {company_id}</body></html>",
+                        'url': url,
+                        'synthetic': True
+                    }
+            
+            return {
+                'text': f"LinkedIn URL: {url}. LinkedIn restricts automated scraping of this content.",
+                'html': f"<html><body>LinkedIn URL: {url}</body></html>",
+                'url': url,
+                'synthetic': True
+            }
+        
         headers = {
-            'User-Agent': 'JuiceAIBot/1.0 (+https://juiceai.example.com/bot)'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Referer': 'https://www.google.com/'
         }
-        response = requests.get(url, headers=headers, timeout=10)
+        response = requests.get(url, headers=headers, timeout=15)
         response.raise_for_status()
         
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -142,11 +174,25 @@ def fetch_url_content(url):
         return {
             'text': text,
             'html': response.text,
-            'url': url
+            'url': url,
+            'synthetic': False
         }
     except Exception as e:
         logger.error(f"Error fetching URL {url}: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to fetch URL: {str(e)}")
+        
+        error_message = str(e)
+        if 'ConnectionError' in error_message:
+            error_message = "Could not connect to the website. Please check the URL and try again."
+        elif '403' in error_message:
+            error_message = "Access to this website is forbidden. The website may be blocking automated access."
+        elif '404' in error_message:
+            error_message = "The requested page was not found. Please check the URL and try again."
+        elif '429' in error_message:
+            error_message = "Too many requests to this website. Please try again later."
+        elif '5' in error_message and error_message[0] == '5':
+            error_message = "The website is experiencing issues. Please try again later."
+        
+        raise HTTPException(status_code=500, detail=error_message)
 
 def respect_robots_txt(url):
     """Check if scraping is allowed by robots.txt."""
@@ -179,6 +225,28 @@ async def extract_contacts(request: ExtractionRequest):
         content = fetch_url_content(request.source)
         text = content['text']
         source = request.source
+        
+        if content.get('synthetic', False) and 'linkedin.com' in request.source:
+            parsed_url = urlparse(request.source)
+            path_parts = parsed_url.path.strip('/').split('/')
+            
+            linkedin_contact = Contact(
+                type="social",
+                value=request.source,
+                source=request.source,
+                metadata={"platform": "linkedin"},
+                tags=["auto-extracted", "linkedin"]
+            )
+            
+            if len(path_parts) >= 2:
+                if path_parts[0] == 'in':
+                    linkedin_contact.metadata["profile_id"] = path_parts[1]
+                    linkedin_contact.metadata["profile_type"] = "personal"
+                elif path_parts[0] == 'company':
+                    linkedin_contact.metadata["company_id"] = path_parts[1]
+                    linkedin_contact.metadata["profile_type"] = "company"
+            
+            return [linkedin_contact]
     
     emails = extract_emails(text, source)
     phones = extract_phones(text, source)
