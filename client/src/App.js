@@ -17,6 +17,7 @@ function App() {
     const user = localStorage.getItem('juiceAI_user');
     if (user) {
       setIsAuthenticated(true);
+      setShowDashboard(true);
     }
   }, []);
   
@@ -26,17 +27,15 @@ function App() {
       <CampaignProvider>
         <Router>
           {isAuthenticated && showDashboard ? (
-            <Layout>
-              <Routes>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/dashboard/contact-lists" element={<ContactLists />} />
-                <Route path="/dashboard/campaigns" element={<Campaigns />} />
-                <Route path="/dashboard/analytics" element={<Analytics />} />
-                <Route path="/dashboard/settings" element={<div className="p-4">Settings Page</div>} />
-                <Route path="/dashboard/help" element={<div className="p-4">Help Page</div>} />
-                <Route path="/" element={<Navigate to="/dashboard" />} />
-              </Routes>
-            </Layout>
+            <Routes>
+              <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+              <Route path="/dashboard/contact-lists" element={<Layout><ContactLists /></Layout>} />
+              <Route path="/dashboard/campaigns" element={<Layout><Campaigns /></Layout>} />
+              <Route path="/dashboard/analytics" element={<Layout><Analytics /></Layout>} />
+              <Route path="/dashboard/settings" element={<Layout><div className="p-4">Settings Page</div></Layout>} />
+              <Route path="/dashboard/help" element={<Layout><div className="p-4">Help Page</div></Layout>} />
+              <Route path="/" element={<Navigate to="/dashboard" />} />
+            </Routes>
           ) : (
             <Routes>
               <Route path="*" element={

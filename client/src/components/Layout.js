@@ -2,7 +2,7 @@ import React from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
 import { Home, Users, Mail, BarChart2, Settings, HelpCircle } from 'lucide-react';
 
-const Layout = () => {
+const Layout = ({ children }) => {
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
@@ -73,8 +73,8 @@ const Layout = () => {
       </div>
       
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Outlet />
+      <div className="flex-1 flex flex-col overflow-hidden" style={{ height: 'calc(100vh - 64px)' }}>
+        {children || <Outlet />}
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Edit2, Download } from 'lucide-react';
 import { useContacts } from '../context/ContactContext';
-import axios from 'axios';
+import api from '../utils/api';
 
 const Dashboard = () => {
   const [input, setInput] = useState('');
@@ -25,7 +25,7 @@ const Dashboard = () => {
     try {
       setIsProcessing(true);
       
-      const response = await axios.post('/api/extract', { source, type });
+      const response = await api.post('/extract', { source, type });
       const extractedContacts = response.data;
       
       const savedContacts = await addContacts(extractedContacts);
@@ -116,7 +116,7 @@ const Dashboard = () => {
       </div>
       
       {/* Chat Area */}
-      <div className="flex-1 overflow-auto p-4 bg-gray-50">
+      <div className="flex-1 overflow-auto p-4 bg-gray-50" style={{ minHeight: '400px' }}>
         <div className="max-w-3xl mx-auto space-y-4">
           {messages.map((message, index) => (
             <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
